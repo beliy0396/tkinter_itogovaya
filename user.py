@@ -112,33 +112,60 @@ class Cart(ttk.Toplevel):
 
     def init_cart(self):
         self.title('Корзина')
-        self.geometry('1000x400')
+        self.geometry('1000x800')
         self.resizable(False, False)
 
         self.grab_set()
         self.focus_set()
 
-        self.tree = ttk.Treeview(self, columns=('id', 'products.title', 'services.title'),
+        self.tree = ttk.Treeview(self, columns=('id', 'products.title', 'services.title', 'amount', 'products.price'),
                                  height=35,
                                  show='headings')
         self.tree.column('id', width=50, anchor=ttk.CENTER)
         self.tree.column('products.title', width=150, anchor=ttk.CENTER)
         self.tree.column('services.title', width=250, anchor=ttk.CENTER)
+        self.tree.column('amount', width=250, anchor=ttk.CENTER)
+        self.tree.column('products.price', width=250, anchor=ttk.CENTER)
 
 
         self.tree.heading('id', text='ID')
         self.tree.heading('products.title', text='Артикул')
         self.tree.heading('services.title', text='Название')
+        self.tree.heading('amount', text='Количество')
+        self.tree.heading('products.price', text='Цена')
         self.tree.pack()
+
+        toolbar = ttk.Frame(self, bootstyle='light')
+        toolbar.pack(side=ttk.TOP, fill=ttk.X)
+
+        btn_order = ttk.Button(toolbar, text='Продолжить', command=self.open_delivery,
+                                bootstyle="dark")
+        btn_order.pack(side=ttk.LEFT, padx=35, pady=5)
+
+    def open_delivery(self):
+        CardAndDelivery()
 
     def view_cart_table(self):
         self.db.cur.execute(
-            f'''SELECT cart.id, products.title, services.title FROM cart 
+            f'''SELECT cart.id, products.title, services.title, cart.amount, products.price FROM cart 
             INNER JOIN products on cart.product_id = products.id
             INNER JOIN services on cart.service_id = services.id WHERE user_id={int(id[0])}'''
         )
         [self.tree.delete(i) for i in self.tree.get_children()]
         [self.tree.insert('', 'end', values=row) for row in self.db.cur.fetchall()]
+
+class CardAndDelivery(ttk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.init_card_and_delivery()
+
+    def init_card_and_delivery(self):
+        self.title('Данные о доставке')
+        self.geometry('1000x400')
+        self.resizable(False, False)
+
+        self.grab_set()
+        self.focus_set()
 
 class GoodsCatalog(ttk.Toplevel):
     def __init__(self):
@@ -218,20 +245,35 @@ class AddToCart(ttk.Toplevel):
         self.init_add_to_cart()
         self.db = db
         self.get_product()
+        self.get_service()
 
     def init_add_to_cart(self):
         self.title('Добавить товар в корзину')
-        self.geometry('1000x400')
+        self.geometry('1200x400')
         self.resizable(False, False)
 
         self.grab_set()
         self.focus_set()
 
+        label_products = ttk.Label(self, text='Товар:')
+        label_products.pack(side=ttk.LEFT, padx=35, pady=5)
 
         self.combobox_products = ttk.Combobox(self, values=self.get_product)
         self.combobox_products.pack(side=ttk.LEFT, padx=35, pady=5)
 
-        button_add = ttk.Button(self, text='Добавить товар в корзину', command=self.get_product,
+        label_services = ttk.Label(self, text='Дополнительная услуга:')
+        label_services.pack(side=ttk.LEFT, padx=35, pady=5)
+
+        self.combobox_services = ttk.Combobox(self, values=self.get_service)
+        self.combobox_services.pack(side=ttk.LEFT, padx=35, pady=5)
+
+        label_amount = ttk.Label(self, text='Количество:')
+        label_amount.pack(side=ttk.LEFT, padx=35, pady=5)
+
+        self.entry_amount = ttk.Entry(self, bootstyle='success')
+        self.entry_amount.pack(side=ttk.LEFT, padx=35, pady=5)
+
+        button_add = ttk.Button(self, text='Добавить товар в корзину', command=self.add_product,
                                 bootstyle="dark")
         button_add.pack(side=ttk.LEFT, padx=35, pady=5)
 
@@ -243,6 +285,32 @@ class AddToCart(ttk.Toplevel):
         for i in dbb:
             products += i
         self.combobox_products.config(values=products)
+
+    def get_service(self):
+        dbb = self.db.cur.execute(
+            '''SELECT title FROM services'''
+        )
+        services = []
+        for i in dbb:
+            services += i
+        self.combobox_services.config(values=services)
+
+    def add_product(self):
+        id_product = self.db.cur.execute(
+            f'''SELECT id FROM products WHERE title ="{self.combobox_products.get()}"'''
+        )
+        id_product = self.db.cur.fetchone()
+
+        id_service = self.db.cur.execute(
+            f'''SELECT id FROM services WHERE title ="{self.combobox_services.get()}"'''
+        )
+        id_service = self.db.cur.fetchone()
+
+        amount_product = self.entry_amount.get()
+
+        added = self.db.cur.execute(
+            f'''INSERT INTO cart(product_id, service_id, user_id, amount) VALUES({id_product[0]}, {id_service[0]}, {int(id[0])}, '{amount_product}')'''
+        )
 
 
 class ServicesCatalog(ttk.Toplevel):
@@ -310,7 +378,7 @@ class ServicesCatalog(ttk.Toplevel):
 
 class DB:
     def __init__(self):
-        self.conn = sqlite3.connect('database/database.db')
+        self.conn = sqlite3.connect('database/db.db')
         self.cur = self.conn.cursor()
 
         self.cur.execute(
@@ -353,6 +421,7 @@ class DB:
                         user_id INTEGER,
                         product_id INTEGER,
                         service_id INTEGER,
+                        amount VARCHAR,
                         FOREIGN KEY (user_id) REFERENCES users(id),
                         FOREIGN KEY (product_id) REFERENCES products(id),
                         FOREIGN KEY (service_id) REFERENCES services(id)

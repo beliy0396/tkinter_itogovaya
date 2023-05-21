@@ -20,9 +20,7 @@
     <last-used-providers />
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files>
-      <object connection-id="67c14b06-af80-4281-bafb-5b6b36eaf52c" object-ref="schemas/main/tables/users" />
-    </open-files>
+    <open-files />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
     <filter-actions connection-id="67c14b06-af80-4281-bafb-5b6b36eaf52c" dataset="main.users" active-filter-id="EMPTY_FILTER" />
@@ -62,7 +60,7 @@
           <port value="" />
           <database value="" />
           <files>
-            <file path="C:\Users\Максим\PycharmProjects\tkinter_itogovaya\database\database.db" schema="main" />
+            <file path="C:\Users\Максим\PycharmProjects\tkinter_itogovaya\database\db.db" schema="main" />
           </files>
           <type value="NONE" />
           <user value="" />
