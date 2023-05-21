@@ -33,15 +33,20 @@ class Main(ttk.Frame):
 
         with sqlite3.connect("database/database.db") as file_db:
             cur = file_db.cursor()
-        find_user = f"SELECT * FROM users WHERE login = '{login}' AND password = '{password}'"
+        find_user = f"SELECT id FROM users WHERE login = '{login}' AND password = '{password}'"
         cur.execute(find_user)
         results = cur.fetchall()
+        global id
+        id = []
+        for i in results:
+            id += i
         if results:
             success = Messagebox.show_info('Успешная авторизация!')
             root.withdraw()
             self.open_shop_index()
         else:
             dont_success = Messagebox.show_info('Неверный логин или пароль!')
+
 
     def open_shop_index(self):
         ShopIndex()
@@ -128,9 +133,9 @@ class Cart(ttk.Toplevel):
 
     def view_cart_table(self):
         self.db.cur.execute(
-            '''SELECT cart.id, products.title, services.title FROM cart 
+            f'''SELECT cart.id, products.title, services.title FROM cart 
             INNER JOIN products on cart.product_id = products.id
-            INNER JOIN services on cart.service_id = services.id WHERE user_id=1'''
+            INNER JOIN services on cart.service_id = services.id WHERE user_id={int(id[0])}'''
         )
         [self.tree.delete(i) for i in self.tree.get_children()]
         [self.tree.insert('', 'end', values=row) for row in self.db.cur.fetchall()]
@@ -212,6 +217,7 @@ class AddToCart(ttk.Toplevel):
         super().__init__(root)
         self.init_add_to_cart()
         self.db = db
+        self.get_product()
 
     def init_add_to_cart(self):
         self.title('Добавить товар в корзину')
@@ -222,8 +228,7 @@ class AddToCart(ttk.Toplevel):
         self.focus_set()
 
 
-        combobox_values = self.get_product
-        self.combobox_products = ttk.Combobox(self, values=combobox_values)
+        self.combobox_products = ttk.Combobox(self, values=self.get_product)
         self.combobox_products.pack(side=ttk.LEFT, padx=35, pady=5)
 
         button_add = ttk.Button(self, text='Добавить товар в корзину', command=self.get_product,
@@ -237,6 +242,8 @@ class AddToCart(ttk.Toplevel):
         products = []
         for i in dbb:
             products += i
+        self.combobox_products.config(values=products)
+
 
 class ServicesCatalog(ttk.Toplevel):
     def __init__(self):
