@@ -12,7 +12,7 @@
     <loaded-nodes />
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
-    <connection id="67c14b06-af80-4281-bafb-5b6b36eaf52c">
+    <connection id="2f1e5401-ca64-4402-a265-5eca12cc14a0">
       <console name="Connection" type="STANDARD" schema="" session="Main" />
     </connection>
   </component>
@@ -23,10 +23,11 @@
     <open-files />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
-    <filter-actions connection-id="67c14b06-af80-4281-bafb-5b6b36eaf52c" dataset="main.users" active-filter-id="EMPTY_FILTER" />
-    <filter-actions connection-id="67c14b06-af80-4281-bafb-5b6b36eaf52c" dataset="main.products" active-filter-id="EMPTY_FILTER" />
-    <filter-actions connection-id="67c14b06-af80-4281-bafb-5b6b36eaf52c" dataset="main.services" active-filter-id="EMPTY_FILTER" />
-    <filter-actions connection-id="67c14b06-af80-4281-bafb-5b6b36eaf52c" dataset="main.cart" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="2f1e5401-ca64-4402-a265-5eca12cc14a0" dataset="main.users" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="2f1e5401-ca64-4402-a265-5eca12cc14a0" dataset="main.products" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="2f1e5401-ca64-4402-a265-5eca12cc14a0" dataset="main.services" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="2f1e5401-ca64-4402-a265-5eca12cc14a0" dataset="main.cart" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="2f1e5401-ca64-4402-a265-5eca12cc14a0" dataset="main.orders" active-filter-id="EMPTY_FILTER" />
   </component>
   <component name="DBNavigator.Project.ExecutionManager">
     <retain-sticky-names value="false" />
@@ -45,7 +46,7 @@
   </component>
   <component name="DBNavigator.Project.Settings">
     <connections>
-      <connection id="67c14b06-af80-4281-bafb-5b6b36eaf52c" active="true" signed="true">
+      <connection id="2f1e5401-ca64-4402-a265-5eca12cc14a0" active="true" signed="true">
         <database>
           <name value="Connection" />
           <description value="" />
@@ -60,7 +61,7 @@
           <port value="" />
           <database value="" />
           <files>
-            <file path="C:\Users\Максим\PycharmProjects\tkinter_itogovaya\database\db.db" schema="main" />
+            <file path="C:\Users\Максим\PycharmProjects\tkinter_itogovaya\database\database.db" schema="main" />
           </files>
           <type value="NONE" />
           <user value="" />
