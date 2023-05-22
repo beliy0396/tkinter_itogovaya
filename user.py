@@ -151,7 +151,6 @@ class Cart(ttk.Toplevel):
 
     def check(self, *args):
         a = self.tree.get_children()
-        print(a)
         if len(a) > 0:
             Order()
         else:
@@ -292,16 +291,46 @@ class Order(ttk.Toplevel):
         btn_order.pack(side=ttk.LEFT, padx=35, pady=5)
 
     def open_delivery(self):
-        global email, fullname, phone, country, city, street, house, comment
-        email = self.entry_email.get()
-        fullname = self.entry_fullname.get()
-        phone = self.entry_phone_number.get()
-        country = self.combobox_country.get()
-        city = self.entry_city.get()
-        street = self.entry_street.get()
-        house = self.entry_house.get()
-        comment = self.entry_comment.get()
-        Delivery()
+        if (self.entry_email.get() == '') or (self.entry_fullname.get() == '') or (self.combobox_country.get() == '')\
+                or (self.entry_city.get() == '')\
+                or (self.entry_street.get() == '')\
+                or (self.entry_house.get() == '')\
+                or (self.entry_phone_number.get() == ''):
+            EntryNull()
+        else:
+            global email, fullname, phone, country, city, street, house, comment
+            email = self.entry_email.get()
+            fullname = self.entry_fullname.get()
+            phone = self.entry_phone_number.get()
+            country = self.combobox_country.get()
+            city = self.entry_city.get()
+            street = self.entry_street.get()
+            house = self.entry_house.get()
+            comment = self.entry_comment.get()
+            Delivery()
+            self.destroy()
+
+class EntryNull(ttk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.init_entry_null()
+
+    def init_entry_null(self):
+        self.title('Ошибка')
+        self.geometry('300x100')
+        self.resizable(False, False)
+
+        self.grab_set()
+        self.focus_set()
+
+        label_delete = ttk.Label(self, text='Введены не все данные!')
+        label_delete.pack(side=ttk.TOP, padx=35, pady=5)
+
+        btn_yes = ttk.Button(self, text='Ок', command=self.close,
+                             bootstyle="dark")
+        btn_yes.pack(side=ttk.TOP, padx=35, pady=5)
+
+    def close(self):
         self.destroy()
 
 class Delivery(ttk.Toplevel):
@@ -309,6 +338,8 @@ class Delivery(ttk.Toplevel):
         super().__init__(root)
         self.init_delivery()
         self.db = db
+        self.price_products()
+        self.price_full()
 
     def init_delivery(self):
         self.title('Способ доставки')
@@ -335,39 +366,61 @@ class Delivery(ttk.Toplevel):
         label_pred = ttk.Label(self, text='Предоплата доставки')
         label_pred.pack(side=ttk.TOP, padx=35, pady=5)
 
-        check_btn_CDEK_p = ttk.Checkbutton(self, text='CDEK', command=self.delivery_cdek)
-        check_btn_CDEK_p.pack(side=ttk.TOP, padx=35, pady=5)
+        self.check_btn_CDEK_p = ttk.Checkbutton(self, text='CDEK', command=self.delivery_cdek)
+        self.check_btn_CDEK_p.pack(side=ttk.TOP, padx=35, pady=5)
 
-        check_btn_POCHTA_p = ttk.Checkbutton(self, text='Почта России', command=self.delivery_pochta)
-        check_btn_POCHTA_p.pack(side=ttk.TOP, padx=35, pady=5)
+        self.check_btn_POCHTA_p = ttk.Checkbutton(self, text='Почта России', command=self.delivery_pochta)
+        self.check_btn_POCHTA_p.pack(side=ttk.TOP, padx=35, pady=5)
 
         label_full = ttk.Label(self, text='Полная предоплата заказа')
         label_full.pack(side=ttk.TOP, padx=35, pady=5)
 
-        check_btn_CDEK_f = ttk.Checkbutton(self, text='CDEK', command=self.delivery_cdek)
-        check_btn_CDEK_f.pack(side=ttk.TOP, padx=35, pady=5)
+        self.check_btn_CDEK_f = ttk.Checkbutton(self, text='CDEK', command=self.delivery_cdek)
+        self.check_btn_CDEK_f.pack(side=ttk.TOP, padx=35, pady=5)
 
-        check_btn_POCHTA_f = ttk.Checkbutton(self, text='Почта России', command=self.delivery_pochta)
-        check_btn_POCHTA_f.pack(side=ttk.TOP, padx=35, pady=5)
+        self.check_btn_POCHTA_f = ttk.Checkbutton(self, text='Почта России', command=self.delivery_pochta)
+        self.check_btn_POCHTA_f.pack(side=ttk.TOP, padx=35, pady=5)
 
-        label_full_price = ttk.Label(self, text=f'ИТОГО К ОПЛАТЕ: {self.delivery_price}')
-        label_full_price.pack(side=ttk.TOP, padx=35, pady=5)
+        self.full_price = 0
+        self.label_full_price = ttk.Label(self, text=f'ИТОГО К ОПЛАТЕ: {self.full_price} руб.')
+        self.label_full_price.pack(side=ttk.TOP, padx=35, pady=5)
 
-        label_price_products = ttk.Label(self, text=f'СТОИМОСТЬ ТОВАРОВ: ')
-        label_price_products.pack(side=ttk.TOP, padx=35, pady=5)
+        self.price_product = 0
+        self.label_price_products = ttk.Label(self, text=f'СТОИМОСТЬ ТОВАРОВ: {self.price_product} руб.')
+        self.label_price_products.pack(side=ttk.TOP, padx=35, pady=5)
 
 
-        self.label_deliverys_price = ttk.Label(self, text=f'СТОИМОСТЬ ДОСТАВКИ: {self.delivery_price}')
+        self.label_deliverys_price = ttk.Label(self, text=f'СТОИМОСТЬ ДОСТАВКИ: {self.delivery_price} руб.')
         self.label_deliverys_price.pack(side=ttk.TOP, padx=35, pady=5)
 
         btn_pay = ttk.Button(self, text='Оплатить', command=self.added_order,
                              bootstyle="dark")
         btn_pay.pack(side=ttk.TOP, padx=35, pady=5)
 
+    def price_full(self):
+        self.full_price = self.price_product + self.delivery_price
+        self.label_full_price.config(text=f'ИТОГО К ОПЛАТЕ: {self.full_price} руб.')
+    def price_products(self):
+        price = self.db.cur.execute(
+            f'''SELECT products.price, amount FROM cart 
+            INNER JOIN products on cart.product_id = products.id
+            WHERE user_id = {int(id[0])}'''
+        )
+        while True:
+            price = self.db.cur.fetchone()
+            if price:
+                self.price_product = int(price[0]) * int(price[1])
+            else:
+                break
+        self.label_price_products.config(text=f'СТОИМОСТЬ ТОВАРОВ: {self.price_product}')
+
     def added_order(self):
         cart = self.db.cur.execute(
             f'''SELECT amount, product_id, service_id FROM cart WHERE user_id = {int(id[0])}'''
         )
+        # if (self.check_btn_POCHTA_f.state()[0] == 'alternate') or (self.check_btn_CDEK_f.state()[0] == 'alternate') or (self.check_btn_POCHTA_p.state()[0] == 'alternate') or (self.check_btn_CDEK_p.state()[0] == 'alternate'):
+        #     DeliveryNull()
+        # else:
         while True:
             cart = self.db.cur.fetchone()
             if cart:
@@ -378,15 +431,41 @@ class Delivery(ttk.Toplevel):
             else:
                 break
 
-
-
     def delivery_cdek(self):
         self.delivery_price = 550
         self.label_deliverys_price.config(text=f'СТОИМОСТЬ ДОСТАВКИ: {self.delivery_price}')
+        self.full_price = self.price_product + self.delivery_price
+        self.label_full_price.config(text=f'ИТОГО К ОПЛАТЕ: {self.full_price} руб.')
+
 
     def delivery_pochta(self):
         self.delivery_price = 500
         self.label_deliverys_price.config(text=f'СТОИМОСТЬ ДОСТАВКИ: {self.delivery_price}')
+        self.full_price = self.price_product + self.delivery_price
+        self.label_full_price.config(text=f'ИТОГО К ОПЛАТЕ: {self.full_price} руб.')
+
+class DeliveryNull(ttk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.init_delivery_null()
+
+    def init_delivery_null(self):
+        self.title('Ошибка')
+        self.geometry('300x100')
+        self.resizable(False, False)
+
+        self.grab_set()
+        self.focus_set()
+
+        label_delete = ttk.Label(self, text='Не выбран способ доставки!')
+        label_delete.pack(side=ttk.TOP, padx=35, pady=5)
+
+        btn_yes = ttk.Button(self, text='Ок', command=self.close,
+                             bootstyle="dark")
+        btn_yes.pack(side=ttk.TOP, padx=35, pady=5)
+
+    def close(self):
+        self.destroy()
 
 class GoodsCatalog(ttk.Toplevel):
     def __init__(self):
