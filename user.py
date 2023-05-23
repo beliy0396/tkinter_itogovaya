@@ -1,5 +1,6 @@
 import ttkbootstrap as ttk
 import sqlite3
+import datetime
 from tkinter import *
 from ttkbootstrap.dialogs import Messagebox
 
@@ -433,7 +434,7 @@ class Delivery(ttk.Toplevel):
             cart = self.db.cur.fetchall()
             if cart:
                 added_order = self.db.cur.execute(
-                    f'''INSERT INTO orders(user_id, email, fullname, phone_number, country, city, street, house, comment, delivery, delivery_price, full_price) VALUES({int(id[0])}, "{email}", "{fullname}", "{phone}", "{country}", "{city}", "{street}", "{house}", "{comment}", "{delivery}", "{self.delivery_price}", "{self.full_price}")'''
+                    f'''INSERT INTO orders(user_id, email, fullname, phone_number, country, city, street, house, comment, delivery, delivery_price, full_price, date) VALUES({int(id[0])}, "{email}", "{fullname}", "{phone}", "{country}", "{city}", "{street}", "{house}", "{comment}", "{delivery}", "{self.delivery_price}", "{self.full_price}", "{datetime.date.today()}")'''
                 )
                 order_id = self.db.cur.execute(
                     f'''SELECT id FROM orders WHERE user_id == {int(id[0])} AND email == "{email}" AND fullname == "{fullname}" AND phone_number == "{phone}" AND country == "{country}" AND city == "{city}" AND street == "{street}" AND house == "{house}" AND comment == "{comment}" AND delivery == "{delivery}" AND delivery_price == "{self.delivery_price}" AND full_price == "{self.full_price}"'''
@@ -932,6 +933,7 @@ class DB:
                         delivery VARCHAR, 
                         delivery_price VARCHAR,
                         full_price VARCHAR,
+                        date DATE,
                         FOREIGN KEY (user_id) REFERENCES users(id)
                     );'''
         )

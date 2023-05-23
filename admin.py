@@ -1,5 +1,6 @@
 import ttkbootstrap as ttk
 import sqlite3
+import datetime
 from tkinter import *
 from ttkbootstrap.dialogs import Messagebox
 
@@ -70,8 +71,182 @@ class ShopIndex(ttk.Toplevel):
                                bootstyle="dark")
         btn_orders.pack(side=ttk.LEFT, padx=35, pady=5)
 
+        btn_finance = ttk.Button(toolbar, text='Финансы', command=self.open_finance, image=self.catalog_img,
+                                bootstyle="dark")
+        btn_finance.pack(side=ttk.LEFT, padx=35, pady=5)
+
     def open_orders(self):
         Orders()
+
+    def open_finance(self):
+        Finance()
+
+class Finance(ttk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.init_finance()
+
+    def init_finance(self):
+        self.title('Финансы')
+        self.geometry('1000x400')
+        self.resizable(False, False)
+
+        self.grab_set()
+        self.focus_set()
+
+        btn_all = ttk.Button(self, text='Прибыль за всё время', command=self.open_all,
+                             bootstyle="dark")
+        btn_all.pack(side=ttk.LEFT, padx=35, pady=5)
+
+        btn_month = ttk.Button(self, text='Прибыль за последний месяц', command=self.open_month,
+                             bootstyle="dark")
+        btn_month.pack(side=ttk.LEFT, padx=35, pady=5)
+
+        btn_category = ttk.Button(self, text='Прибыль по категориям', command=self.open_category,
+                             bootstyle="dark")
+        btn_category.pack(side=ttk.LEFT, padx=35, pady=5)
+
+    def open_all(self):
+        AllFinance()
+
+    def open_month(self):
+        MonthFinance()
+
+    def open_category(self):
+        CategoryFinance()
+
+class AllFinance(ttk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.init_orders()
+        self.db = db
+        self.get_money()
+
+    def init_orders(self):
+        self.title('Прибыль за всё время')
+        self.geometry('1000x400')
+        self.resizable(False, False)
+
+        self.grab_set()
+        self.focus_set()
+
+        self.full_money = 0
+
+        self.label_full_money = ttk.Label(self, text=f'Полная прибыль за всё время {self.full_money} руб.')
+        self.label_full_money.pack(side=ttk.TOP, padx=35, pady=5)
+
+    def get_money(self):
+        all_money = self.db.cur.execute(
+            f'''SELECT product_price, service_price, amount FROM products_in_order'''
+        )
+        all_money = self.db.cur.fetchall()
+        for i in all_money:
+            self.full_money += (int(i[0]) + int(i[1])) * int(i[2])
+        self.label_full_money.config(text=f'Полная прибыль за всё время {self.full_money} руб.')
+
+class CategoryFinance(ttk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.init_orders()
+        self.db = db
+        self.get_money_product()
+        self.get_money_services()
+
+    def init_orders(self):
+        self.title('Прибыль по категориям')
+        self.geometry('1000x400')
+        self.resizable(False, False)
+
+        self.grab_set()
+        self.focus_set()
+
+        self.full_money = 0
+
+        self.categorys_product = ['Смартфоны', 'Ноутбуки', 'Наушники']
+
+        self.label_products = ttk.Label(self, text='Товары:')
+        self.label_products.pack(side=ttk.TOP, padx=35, pady=5)
+
+        self.combobox_categorys_products = ttk.Combobox(self, values=self.categorys_product)
+        self.combobox_categorys_products.pack(side=ttk.TOP, padx=35, pady=5)
+        self.combobox_categorys_products.bind("<<ComboboxSelected>>", self.get_money_product)
+
+
+        self.label_category_products_money = ttk.Label(self, text='Прибыль по категории руб.')
+        self.label_category_products_money.pack(side=ttk.TOP, padx=35, pady=5)
+
+
+        self.categorys_services = ['Комплект приложений', 'Наклейка стекла на смартфон', 'Создание учётной записи']
+
+        self.label_services = ttk.Label(self, text='Услуги:')
+        self.label_services.pack(side=ttk.TOP, padx=35, pady=5)
+
+        self.combobox_categorys_services = ttk.Combobox(self, values=self.categorys_services)
+        self.combobox_categorys_services.pack(side=ttk.TOP, padx=35, pady=5)
+        self.combobox_categorys_services.bind("<<ComboboxSelected>>", self.get_money_services)
+
+        self.label_category_services_money = ttk.Label(self, text='Прибыль по категории руб.')
+        self.label_category_services_money.pack(side=ttk.TOP, padx=35, pady=5)
+
+
+    def get_money_product(self, *args):
+        category = self.combobox_categorys_products.get()
+        category_money = self.db.cur.execute(
+            f'''SELECT products_in_order.product_price, products_in_order.amount FROM products_in_order 
+            INNER JOIN products on products_in_order.product_id = products.id
+            WHERE products.category == "{category}"'''
+        )
+        category_money = self.db.cur.fetchall()
+        for i in category_money:
+            self.full_money += int(i[0]) * int(i[1])
+        self.label_category_products_money.config(text=f'Прибыль по категории {self.combobox_categorys_products.get()} {self.full_money} руб.')
+        self.full_money = 0
+
+    def get_money_services(self, *args):
+        category = self.combobox_categorys_services.get()
+        category_money = self.db.cur.execute(
+            f'''SELECT products_in_order.service_price, products_in_order.amount FROM products_in_order 
+            INNER JOIN services on products_in_order.service_id = services.id
+            WHERE services.category == "{category}"'''
+        )
+        category_money = self.db.cur.fetchall()
+        for i in category_money:
+            self.full_money += int(i[0]) * int(i[1])
+        self.label_category_services_money.config(text=f'Прибыль по категории {self.combobox_categorys_products.get()} {self.full_money} руб.')
+        self.full_money = 0
+
+class MonthFinance(ttk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.init_month_finance()
+        self.db = db
+        self.get_month_money()
+
+    def init_month_finance(self):
+        self.title('Прибыль за последний месяц')
+        self.geometry('1000x400')
+        self.resizable(False, False)
+
+        self.grab_set()
+        self.focus_set()
+
+        self.full_money = 0
+
+        self.label_month_money = ttk.Label(self, text=f'Полная прибыль за последний месяц {self.full_money} руб.')
+        self.label_month_money.pack(side=ttk.TOP, padx=35, pady=5)
+
+    def get_month_money(self):
+        all_money = self.db.cur.execute(
+            f'''SELECT products_in_order.product_price, products_in_order.service_price, products_in_order.amount FROM products_in_order
+            INNER JOIN orders on products_in_order.order_id = orders.id
+            WHERE orders.date >= strftime('%s', 'now', '-1 month') 
+            '''
+        )
+        all_money = self.db.cur.fetchall()
+        for i in all_money:
+            self.full_money += (int(i[0]) + int(i[1])) * int(i[2])
+        self.label_month_money.config(text=f'Полная прибыль за последний месяц {self.full_money} руб.')
+
 
 class Orders(ttk.Toplevel):
     def __init__(self):
@@ -261,27 +436,66 @@ class OrderUpdate(ttk.Toplevel):
         btn_pio.pack(side=ttk.TOP, padx=35, pady=5)
 
     def save(self):
-        if self.entry_fullname.get() == '':
-            fio = self.order[3]
-        elif self.entry_order_email == '':
-            email = self.order[2]
-        elif self.entry_phone.get() == '':
-            phone = self.order[4]
-        elif self.entry_country.get() == '':
-            country = self.order[5]
-        elif self.entry_city.get() == '':
-            city = self.order[6]
-        elif self.entry_street.get() == '':
-            street = self.order[7]
-        elif self.entry_house.get() == '':
-            house = self.order[8]
-        elif self.entry_comment.get() == '':
-            comment = self.order[9]
-        elif self.entry_delivery.get() == '':
-            delivery = self.order[10]
-        elif self.entry_delivery_price.get() == '':
-            del_price = self.order[11]
+        global phone
+        global country
+        global city
+        global street
+        global house
+        global comment
+        global delivery
+        global del_price
 
+        if self.entry_fullname.get() == '':
+            global fio
+            fio = self.order[3]
+        else:
+            fio = self.entry_fullname.get()
+
+        if self.entry_order_email == '':
+            global email
+            email = self.order[2]
+        else:
+            email = self.entry_order_email.get()
+
+        if self.entry_phone.get() == '':
+            phone = self.order[4]
+        else:
+            phone = self.entry_phone.get()
+
+        if self.entry_country.get() == '':
+            country = self.order[5]
+        else:
+            country = self.entry_country.get()
+
+        if self.entry_city.get() == '':
+            city = self.order[6]
+        else:
+            city = self.entry_city.get()
+
+        if self.entry_street.get() == '':
+            street = self.order[7]
+        else:
+            street = self.entry_street.get()
+
+        if self.entry_house.get() == '':
+            house = self.order[8]
+        else:
+            house = self.entry_house.get()
+
+        if self.entry_comment.get() == '':
+            comment = self.order[9]
+        else:
+            comment = self.entry_comment.get()
+
+        if self.entry_delivery.get() == '':
+            delivery = self.order[10]
+        else:
+            delivery = self.entry_delivery.get()
+
+        if self.entry_delivery_price.get() == '':
+            del_price = self.order[11]
+        else:
+            del_price = self.entry_delivery_price.get()
 
         update = self.db.cur.execute(
             f'''UPDATE orders SET email == "{email}",
@@ -297,6 +511,8 @@ class OrderUpdate(ttk.Toplevel):
             WHERE id = {id_order}'''
         )
         self.db.conn.commit()
+        SeccessUpdate()
+        self.destroy()
 
     def open_pio(self):
         self.destroy()
@@ -307,6 +523,7 @@ class OrderUpdate(ttk.Toplevel):
             f'''SELECT * FROM orders WHERE id = "{id_order}"'''
         )
         self.order = self.db.cur.fetchone()
+
         self.label_order_id_user.config(text=f'ID пользователя: {self.order[1]}')
         self.label_order_email.config(text=f'E-Mail: {self.order[2]}')
         self.label_fullname.config(text=f'ФИО: {self.order[3]}')
@@ -319,6 +536,30 @@ class OrderUpdate(ttk.Toplevel):
         self.label_delivery.config(text=f'Доставка: {self.order[10]}')
         self.label_delivery_price.config(text=f'Стоимость доставки: {self.order[11]}')
         self.label_fullprice.config(text=f'Полная стоимость заказа: {self.order[12]}')
+
+class SeccessUpdate(ttk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.init_success_update()
+
+    def init_success_update(self):
+        self.title(f'Успешно обновлено!')
+        self.geometry('200x400')
+        self.resizable(False, False)
+
+        self.grab_set()
+        self.focus_set()
+
+        label_ok = ttk.Label(self, text='Заказ успешно обновлен!')
+        label_ok.pack(side=ttk.TOP, padx=35, pady=5)
+
+        btn_yes = ttk.Button(self, text='ОК', command=self.yes,
+                             bootstyle="dark")
+        btn_yes.pack(side=ttk.TOP, padx=35, pady=5)
+
+    def yes(self):
+        OrderUpdate()
+        self.destroy()
 
 class Pio(ttk.Toplevel):
     def __init__(self):
