@@ -153,6 +153,7 @@ class Cart(ttk.Toplevel):
         a = self.tree.get_children()
         if len(a) > 0:
             Order()
+            self.destroy()
         else:
             CartNot()
 
@@ -366,19 +367,21 @@ class Delivery(ttk.Toplevel):
         label_pred = ttk.Label(self, text='Предоплата доставки')
         label_pred.pack(side=ttk.TOP, padx=35, pady=5)
 
-        self.check_btn_CDEK_p = ttk.Checkbutton(self, text='CDEK', command=self.delivery_cdek)
+        self.var = ttk.IntVar()
+        self.var.set(0)
+        self.check_btn_CDEK_p = ttk.Radiobutton(self, text='CDEK', command=self.delivery_cdek, variable=self.var, value=0)
         self.check_btn_CDEK_p.pack(side=ttk.TOP, padx=35, pady=5)
 
-        self.check_btn_POCHTA_p = ttk.Checkbutton(self, text='Почта России', command=self.delivery_pochta)
+        self.check_btn_POCHTA_p = ttk.Radiobutton(self, text='Почта России', command=self.delivery_pochta, variable=self.var, value=1)
         self.check_btn_POCHTA_p.pack(side=ttk.TOP, padx=35, pady=5)
 
         label_full = ttk.Label(self, text='Полная предоплата заказа')
         label_full.pack(side=ttk.TOP, padx=35, pady=5)
 
-        self.check_btn_CDEK_f = ttk.Checkbutton(self, text='CDEK', command=self.delivery_cdek)
+        self.check_btn_CDEK_f = ttk.Radiobutton(self, text='CDEK', command=self.delivery_cdek, variable=self.var, value=3)
         self.check_btn_CDEK_f.pack(side=ttk.TOP, padx=35, pady=5)
 
-        self.check_btn_POCHTA_f = ttk.Checkbutton(self, text='Почта России', command=self.delivery_pochta)
+        self.check_btn_POCHTA_f = ttk.Radiobutton(self, text='Почта России', command=self.delivery_pochta, variable=self.var, value=4)
         self.check_btn_POCHTA_f.pack(side=ttk.TOP, padx=35, pady=5)
 
         self.full_price = 0
@@ -400,6 +403,7 @@ class Delivery(ttk.Toplevel):
     def price_full(self):
         self.full_price = self.price_product + self.delivery_price
         self.label_full_price.config(text=f'ИТОГО К ОПЛАТЕ: {self.full_price} руб.')
+
     def price_products(self):
         price = self.db.cur.execute(
             f'''SELECT products.price, amount FROM cart 
@@ -416,20 +420,44 @@ class Delivery(ttk.Toplevel):
 
     def added_order(self):
         cart = self.db.cur.execute(
-            f'''SELECT amount, product_id, service_id FROM cart WHERE user_id = {int(id[0])}'''
+            f'''SELECT cart.id, amount, product_id, products.price, service_id, services.price FROM cart
+            INNER JOIN products on cart.product_id = products.id
+            INNER JOIN services on cart.service_id = services.id
+             WHERE user_id = {int(id[0])}'''
         )
-        # if (self.check_btn_POCHTA_f.state()[0] == 'alternate') or (self.check_btn_CDEK_f.state()[0] == 'alternate') or (self.check_btn_POCHTA_p.state()[0] == 'alternate') or (self.check_btn_CDEK_p.state()[0] == 'alternate'):
-        #     DeliveryNull()
-        # else:
+        if self.delivery_price == 500:
+            delivery = 'POCHTA'
+        else:
+            delivery = 'CDEK'
         while True:
-            cart = self.db.cur.fetchone()
+            cart = self.db.cur.fetchall()
             if cart:
-                added = self.db.cur.execute(
-                    f'''INSERT INTO orders(user_id, product_id, service_id, amount, email, fullname, phone_number, country, city, street, house, comment) VALUES({int(id[0])}, {cart[1]}, {cart[2]} , "{cart[0]}", "{email}", "{fullname}", "{phone}", "{country}", "{city}", "{street}", "{house}", "{comment}")'''
+                added_order = self.db.cur.execute(
+                    f'''INSERT INTO orders(user_id, email, fullname, phone_number, country, city, street, house, comment, delivery, delivery_price, full_price) VALUES({int(id[0])}, "{email}", "{fullname}", "{phone}", "{country}", "{city}", "{street}", "{house}", "{comment}", "{delivery}", "{self.delivery_price}", "{self.full_price}")'''
                 )
+                order_id = self.db.cur.execute(
+                    f'''SELECT id FROM orders WHERE user_id == {int(id[0])} AND email == "{email}" AND fullname == "{fullname}" AND phone_number == "{phone}" AND country == "{country}" AND city == "{city}" AND street == "{street}" AND house == "{house}" AND comment == "{comment}" AND delivery == "{delivery}" AND delivery_price == "{self.delivery_price}" AND full_price == "{self.full_price}"'''
+                )
+                order_id = self.db.cur.fetchone()
+
                 self.db.conn.commit()
+                for i in cart:
+                    added_pio = self.db.cur.execute(
+                        f'''INSERT INTO products_in_order(order_id, product_id, product_price, service_id, service_price, amount) VALUES({int(order_id[0])}, "{i[2]}", "{i[3]}", "{i[4]}", "{i[5]}", "{i[1]}")'''
+                    )
+                    self.db.conn.commit()
+
+                    deleted = self.db.cur.execute(
+                        f'''DELETE FROM cart WHERE user_id == {int(id[0])} AND id = {i[0]}'''
+                    )
+                    self.db.conn.commit()
             else:
                 break
+        self.close()
+        SuccessOrder()
+
+    def close(self):
+        self.destroy()
 
     def delivery_cdek(self):
         self.delivery_price = 550
@@ -443,6 +471,31 @@ class Delivery(ttk.Toplevel):
         self.label_deliverys_price.config(text=f'СТОИМОСТЬ ДОСТАВКИ: {self.delivery_price}')
         self.full_price = self.price_product + self.delivery_price
         self.label_full_price.config(text=f'ИТОГО К ОПЛАТЕ: {self.full_price} руб.')
+
+class SuccessOrder(ttk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.init_success_order()
+
+    def init_success_order(self):
+        self.title('Успешно!')
+        self.geometry('300x100')
+        self.resizable(False, False)
+
+        self.grab_set()
+        self.focus_set()
+
+        label_delete = ttk.Label(self, text='Ваш заказ успешно оформлен!')
+        label_delete.pack(side=ttk.TOP, padx=35, pady=5)
+
+        btn_yes = ttk.Button(self, text='Ок', command=self.close,
+                             bootstyle="dark")
+        btn_yes.pack(side=ttk.TOP, padx=35, pady=5)
+
+    def close(self):
+        self.destroy()
+        Cart()
+
 
 class DeliveryNull(ttk.Toplevel):
     def __init__(self):
@@ -604,6 +657,7 @@ class ServiceAdd(ttk.Toplevel):
     def yes(self):
         ServiceAdded()
         self.destroy()
+
 class ServiceAdded(ttk.Toplevel):
     def __init__(self):
         super().__init__(root)
@@ -795,7 +849,6 @@ class ServicesCatalog(ttk.Toplevel):
         self.tree.heading('category', text='Категория')
         self.tree.heading('price', text='Цена')
         self.tree.pack()
-
     def view_services_table(self):
         self.db.cur.execute(
             '''SELECT * FROM services'''
@@ -868,9 +921,6 @@ class DB:
             '''CREATE TABLE IF NOT EXISTS orders (
                         id INTEGER PRIMARY KEY,
                         user_id INTEGER,
-                        product_id INTEGER,
-                        service_id INTEGER, 
-                        amount VARCHAR,
                         email INTEGER,
                         fullname VARCHAR,
                         phone_number VARCHAR,
@@ -879,9 +929,28 @@ class DB:
                         street VARCHAR,
                         house VARCHAR,
                         comment VARCHAR,
-                        FOREIGN KEY (user_id) REFERENCES users(id),
+                        delivery VARCHAR, 
+                        delivery_price VARCHAR,
+                        full_price VARCHAR,
+                        FOREIGN KEY (user_id) REFERENCES users(id)
+                    );'''
+        )
+        self.conn.commit()
+
+        self.cur.execute(
+            '''CREATE TABLE IF NOT EXISTS products_in_order (
+                        id INTEGER PRIMARY KEY,
+                        order_id INTEGER,
+                        product_id INTEGER,
+                        product_price VARCHAR,
+                        service_id INTEGER, 
+                        service_price VARCHAR,
+                        amount VARCHAR,
+                        FOREIGN KEY (order_id) REFERENCES orders(id),
                         FOREIGN KEY (product_id) REFERENCES products(id),
-                        FOREIGN KEY (service_id) REFERENCES services(id)
+                        FOREIGN KEY (service_id) REFERENCES services(id),
+                        FOREIGN KEY (service_price) REFERENCES services(price),
+                        FOREIGN KEY (product_price) REFERENCES products(price)
                     );'''
         )
         self.conn.commit()
