@@ -468,6 +468,8 @@ class Delivery(ttk.Toplevel):
                 )
                 order_id = self.db.cur.fetchone()
 
+                print(email)
+
                 self.db.conn.commit()
                 for i in cart:
                     added_pio = self.db.cur.execute(
@@ -725,20 +727,20 @@ class ServiceAdded(ttk.Toplevel):
 
     def init_select_service(self):
         self.title('Выбор дополнительной услуги')
-        self.geometry('800x500')
+        self.geometry('900x500')
         self.resizable(False, False)
 
         self.grab_set()
         self.focus_set()
 
-        label_services = ttk.Label(self, text='Дополнительная услуга:')
+        label_services = ttk.Label(self, text='Дополнительная услуга:', font=("Helvetica", 14, 'bold'))
         label_services.pack(side=ttk.TOP, padx=35, pady=5)
 
         button_add = ttk.Button(self, text='Добавить товар в корзину', command=self.add_product,
-                                bootstyle="dark")
+                                bootstyle="secondary")
         button_add.pack(side=ttk.TOP, padx=35, pady=5)
 
-        label_service = ttk.Label(self, text='Услуга:')
+        label_service = ttk.Label(self, text='Услуга:', font=("Helvetica", 10, 'bold'))
         label_service.pack(side=ttk.LEFT, padx=35, pady=5)
 
         self.combobox_services = ttk.Combobox(self, values=self.get_service)
@@ -746,13 +748,13 @@ class ServiceAdded(ttk.Toplevel):
 
         self.combobox_services.bind("<<ComboboxSelected>>", self.get_price)
 
-        self.label_price = ttk.Label(self, text='Цена:')
+        self.label_price = ttk.Label(self, text='Цена:', font=("Helvetica", 10, 'bold'))
         self.label_price.pack(side=ttk.LEFT, padx=35, pady=5)
 
-        label_amount = ttk.Label(self, text='Количество товара:')
+        label_amount = ttk.Label(self, text='Количество товара:', font=("Helvetica", 10, 'bold'))
         label_amount.pack(side=ttk.LEFT, padx=35, pady=5)
 
-        self.entry_amount = ttk.Entry(self, bootstyle='success')
+        self.entry_amount = ttk.Entry(self, bootstyle='secondary')
         self.entry_amount.pack(side=ttk.LEFT, padx=35, pady=5)
 
     def add_product(self):
@@ -784,7 +786,7 @@ class ServiceAdded(ttk.Toplevel):
             f'''SELECT price FROM services WHERE title = "{self.combobox_services.get()}"'''
         )
         services_price = self.db.cur.fetchone()
-        self.label_price.config(text=f'Цена: {services_price[0]}')
+        self.label_price.config(text=f'Цена: {services_price[0]} руб.')
 
 class AddToCartNoService(ttk.Toplevel):
     def __init__(self):
@@ -794,7 +796,7 @@ class AddToCartNoService(ttk.Toplevel):
 
     def init_add_to_cart_no_service(self):
         self.title('Добавить товар в корзину')
-        self.geometry('1400x400')
+        self.geometry('600x400')
         self.resizable(False, False)
 
         self.grab_set()
@@ -1014,7 +1016,7 @@ class DB:
             '''CREATE TABLE IF NOT EXISTS orders (
                         id INTEGER PRIMARY KEY,
                         user_id INTEGER,
-                        email INTEGER,
+                        email VARCHAR,
                         fullname VARCHAR,
                         phone_number VARCHAR,
                         country VARCHAR,

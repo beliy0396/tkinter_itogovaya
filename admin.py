@@ -11,20 +11,20 @@ class Main(ttk.Frame):
 
 
     def init_main(self):
-        label_title = ttk.Label(self, text='Авторизация в системе/Администратор')
-        label_title.pack()
+        label_title = ttk.Label(self, text='Авторизация в системе/Администратор', font=("Helvetica", 24, 'bold'))
+        label_title.pack(pady=50)
 
-        label_login = ttk.Label(self, text='Введите логин')
+        label_login = ttk.Label(self, text='Введите логин', font=("Helvetica", 14, 'bold'))
         label_login.pack()
-        self.entry_login = ttk.Entry(self, bootstyle="success")
-        self.entry_login.pack(pady=5)
+        self.entry_login = ttk.Entry(self, bootstyle="secondary", font=("Helvetica", 10, 'bold'))
+        self.entry_login.pack(pady=(5, 30))
 
-        label_password = ttk.Label(self, text='Введите пароль')
+        label_password = ttk.Label(self, text='Введите пароль', font=("Helvetica", 14, 'bold'))
         label_password.pack()
-        self.entry_password = ttk.Entry(self, bootstyle="success")
-        self.entry_password.pack(pady=5)
+        self.entry_password = ttk.Entry(self, bootstyle="secondary", font=("Helvetica", 10, 'bold'))
+        self.entry_password.pack(pady=(5, 30))
 
-        btn_authorization = ttk.Button(self, text='Авторизация', command=self.check_login_and_password)
+        btn_authorization = ttk.Button(self, text='Авторизация', bootstyle="secondary", width=20, command=self.check_login_and_password)
         btn_authorization.pack()
 
     def check_login_and_password(self):
@@ -88,23 +88,26 @@ class Finance(ttk.Toplevel):
 
     def init_finance(self):
         self.title('Финансы')
-        self.geometry('1000x400')
+        self.geometry('700x400')
         self.resizable(False, False)
 
         self.grab_set()
         self.focus_set()
 
+        label_title = ttk.Label(self, text='Финансы', font=("Helvetica", 24, 'bold'))
+        label_title.pack(pady=50)
+
         btn_all = ttk.Button(self, text='Прибыль за всё время', command=self.open_all,
-                             bootstyle="dark")
-        btn_all.pack(side=ttk.LEFT, padx=35, pady=5)
+                             bootstyle="secondary")
+        btn_all.pack(side=ttk.TOP, padx=35, pady=25)
 
         btn_month = ttk.Button(self, text='Прибыль за последний месяц', command=self.open_month,
-                             bootstyle="dark")
-        btn_month.pack(side=ttk.LEFT, padx=35, pady=5)
+                             bootstyle="secondary")
+        btn_month.pack(side=ttk.TOP, padx=35, pady=25)
 
         btn_category = ttk.Button(self, text='Прибыль по категориям', command=self.open_category,
-                             bootstyle="dark")
-        btn_category.pack(side=ttk.LEFT, padx=35, pady=5)
+                             bootstyle="secondary")
+        btn_category.pack(side=ttk.TOP, padx=35, pady=25)
 
     def open_all(self):
         AllFinance()
@@ -124,15 +127,18 @@ class AllFinance(ttk.Toplevel):
 
     def init_orders(self):
         self.title('Прибыль за всё время')
-        self.geometry('1000x400')
+        self.geometry('1000x300')
         self.resizable(False, False)
 
         self.grab_set()
         self.focus_set()
 
+        label_title = ttk.Label(self, text='Полная прибыль', font=("Helvetica", 24, 'bold'))
+        label_title.pack(pady=50)
+
         self.full_money = 0
 
-        self.label_full_money = ttk.Label(self, text=f'Полная прибыль за всё время {self.full_money} руб.')
+        self.label_full_money = ttk.Label(self, text=f'Полная прибыль за всё время {self.full_money} руб.', font=("Helvetica", 14, 'bold'))
         self.label_full_money.pack(side=ttk.TOP, padx=35, pady=5)
 
     def get_money(self):
@@ -160,6 +166,9 @@ class CategoryFinance(ttk.Toplevel):
         self.grab_set()
         self.focus_set()
 
+        label_title = ttk.Label(self, text='Прибыль по категориям', font=("Helvetica", 24, 'bold'))
+        label_title.pack(pady=50)
+
         self.full_money = 0
 
         self.categorys_product = ['Смартфоны', 'Ноутбуки', 'Наушники']
@@ -172,7 +181,7 @@ class CategoryFinance(ttk.Toplevel):
         self.combobox_categorys_products.bind("<<ComboboxSelected>>", self.get_money_product)
 
 
-        self.label_category_products_money = ttk.Label(self, text='Прибыль по категории руб.')
+        self.label_category_products_money = ttk.Label(self, text='Прибыль по категории руб.', font=("Helvetica", 14, 'bold'))
         self.label_category_products_money.pack(side=ttk.TOP, padx=35, pady=5)
 
 
@@ -185,7 +194,7 @@ class CategoryFinance(ttk.Toplevel):
         self.combobox_categorys_services.pack(side=ttk.TOP, padx=35, pady=5)
         self.combobox_categorys_services.bind("<<ComboboxSelected>>", self.get_money_services)
 
-        self.label_category_services_money = ttk.Label(self, text='Прибыль по категории руб.')
+        self.label_category_services_money = ttk.Label(self, text='Прибыль по категории руб.', font=("Helvetica", 14, 'bold'))
         self.label_category_services_money.pack(side=ttk.TOP, padx=35, pady=5)
 
 
@@ -224,15 +233,18 @@ class MonthFinance(ttk.Toplevel):
 
     def init_month_finance(self):
         self.title('Прибыль за последний месяц')
-        self.geometry('1000x400')
+        self.geometry('1000x300')
         self.resizable(False, False)
 
         self.grab_set()
         self.focus_set()
 
+        label_title = ttk.Label(self, text='Прибыль за последний месяц', font=("Helvetica", 24, 'bold'))
+        label_title.pack(pady=50)
+
         self.full_money = 0
 
-        self.label_month_money = ttk.Label(self, text=f'Полная прибыль за последний месяц {self.full_money} руб.')
+        self.label_month_money = ttk.Label(self, text=f'Полная прибыль за последний месяц {self.full_money} руб.', font=("Helvetica", 14, 'bold'))
         self.label_month_money.pack(side=ttk.TOP, padx=35, pady=5)
 
     def get_month_money(self):
@@ -304,25 +316,25 @@ class SelectItem(ttk.Toplevel):
 
     def init_select_item(self):
         self.title(f'Заказ {id_order}')
-        self.geometry('800x400')
+        self.geometry('800x250')
         self.resizable(False, False)
 
         self.grab_set()
         self.focus_set()
 
-        label_products = ttk.Label(self, text='Редактировать или удалить выбранный заказ?')
-        label_products.pack(side=ttk.TOP, padx=35, pady=5)
+        label_products = ttk.Label(self, text='Редактировать или удалить выбранный заказ?', font=("Helvetica", 14, 'bold'))
+        label_products.pack(side=ttk.TOP, padx=35, pady=50)
 
-        btn_yes = ttk.Button(self, text='Редактировать', command=self.open_order_update,
-                                bootstyle="dark")
+        btn_yes = ttk.Button(self, text='Редактировать', command=self.open_order_update, width=30,
+                                bootstyle="secondary")
         btn_yes.pack(side=ttk.LEFT, padx=35, pady=5)
 
-        btn_delete = ttk.Button(self, text='Удалить', command=self.order_delete,
-                             bootstyle="dark")
+        btn_delete = ttk.Button(self, text='Удалить', command=self.order_delete, width=30,
+                             bootstyle="secondary")
         btn_delete.pack(side=ttk.LEFT, padx=35, pady=5)
 
-        btn_no = ttk.Button(self, text='Вернуться к заказам', command=self.no,
-                                bootstyle="dark")
+        btn_no = ttk.Button(self, text='Вернуться к заказам', command=self.no, width=30,
+                                bootstyle="secondary")
         btn_no.pack(side=ttk.LEFT, padx=35, pady=5)
 
     def no(self):
@@ -338,8 +350,31 @@ class SelectItem(ttk.Toplevel):
         )
         self.db.conn.commit()
         self.destroy()
-        Orders()
+        SuccessDeleteOrder()
 
+class SuccessDeleteOrder(ttk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.init_success_delete_order()
+
+    def init_success_delete_order(self):
+        self.title('Успешное удаление')
+        self.geometry('450x150')
+        self.resizable(False, False)
+
+        self.grab_set()
+        self.focus_set()
+
+        label_delete = ttk.Label(self, text='Заказ успешно удалён!', font=("Helvetica", 14, 'bold'))
+        label_delete.pack(side=ttk.TOP, padx=35, pady=(50, 20))
+
+        btn_yes = ttk.Button(self, text='ОК', command=self.close,
+                             bootstyle="secondary")
+        btn_yes.pack(side=ttk.TOP, padx=35, pady=5)
+
+    def close(self):
+        self.destroy()
+        Orders()
 
 class OrderUpdate(ttk.Toplevel):
     def __init__(self):
@@ -544,17 +579,17 @@ class SeccessUpdate(ttk.Toplevel):
 
     def init_success_update(self):
         self.title(f'Успешно обновлено!')
-        self.geometry('200x400')
+        self.geometry('350x200')
         self.resizable(False, False)
 
         self.grab_set()
         self.focus_set()
 
-        label_ok = ttk.Label(self, text='Заказ успешно обновлен!')
-        label_ok.pack(side=ttk.TOP, padx=35, pady=5)
+        label_ok = ttk.Label(self, text='Заказ успешно обновлен!', font=("Helvetica", 14, 'bold'))
+        label_ok.pack(side=ttk.TOP, padx=35, pady=50)
 
         btn_yes = ttk.Button(self, text='ОК', command=self.yes,
-                             bootstyle="dark")
+                             bootstyle="secondary")
         btn_yes.pack(side=ttk.TOP, padx=35, pady=5)
 
     def yes(self):
@@ -624,22 +659,22 @@ class SelectPio(ttk.Toplevel):
 
     def init_select_item(self):
         self.title(f'Товар {id_product}')
-        self.geometry('400x400')
+        self.geometry('450x400')
         self.resizable(False, False)
 
         self.grab_set()
         self.focus_set()
 
-        label_products = ttk.Label(self, text='Удалить выбранный товар из заказа?')
-        label_products.pack(side=ttk.TOP, padx=35, pady=5)
+        label_products = ttk.Label(self, text='Удалить выбранный товар из заказа?', font=("Helvetica", 14, 'bold'))
+        label_products.pack(side=ttk.TOP, padx=35, pady=50)
 
         btn_yes = ttk.Button(self, text='Удалить', command=self.delete_col,
-                                bootstyle="dark")
+                                bootstyle="secondary")
         btn_yes.pack(side=ttk.LEFT, padx=35, pady=5)
 
         btn_no = ttk.Button(self, text='Вернуться к заказу', command=self.no,
-                                bootstyle="dark")
-        btn_no.pack(side=ttk.LEFT, padx=35, pady=5)
+                                bootstyle="secondary")
+        btn_no.pack(side=ttk.RIGHT, padx=35, pady=5)
 
     def no(self):
         self.destroy()
@@ -650,9 +685,31 @@ class SelectPio(ttk.Toplevel):
         )
         self.db.conn.commit()
         self.destroy()
+        SuccessDeletePio()
+
+class SuccessDeletePio(ttk.Toplevel):
+    def __init__(self):
+        super().__init__(root)
+        self.init_success_delete_pio()
+
+    def init_success_delete_pio(self):
+        self.title('Успешное удаление')
+        self.geometry('450x150')
+        self.resizable(False, False)
+
+        self.grab_set()
+        self.focus_set()
+
+        label_delete = ttk.Label(self, text='Товар успешно удалён!', font=("Helvetica", 14, 'bold'))
+        label_delete.pack(side=ttk.TOP, padx=35, pady=(50, 20))
+
+        btn_yes = ttk.Button(self, text='ОК', command=self.close,
+                             bootstyle="secondary")
+        btn_yes.pack(side=ttk.TOP, padx=35, pady=5)
+
+    def close(self):
+        self.destroy()
         OrderUpdate()
-
-
 
 class DB:
     def __init__(self):
@@ -661,7 +718,7 @@ class DB:
 
 
 if __name__ == "__main__":
-    root = ttk.Window(themename='minty')
+    root = ttk.Window(themename='darkly')
     db = DB()
     app = Main(root)
     app.pack()
