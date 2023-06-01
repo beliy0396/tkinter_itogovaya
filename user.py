@@ -468,8 +468,6 @@ class Delivery(ttk.Toplevel):
                 )
                 order_id = self.db.cur.fetchone()
 
-                print(email)
-
                 self.db.conn.commit()
                 for i in cart:
                     added_pio = self.db.cur.execute(
@@ -611,6 +609,7 @@ class GoodsCatalog(ttk.Toplevel):
         self.tree.pack()
 
     def open_add_products_to_cart(self):
+        self.destroy()
         AddToCart()
 
 
@@ -895,6 +894,8 @@ class AddToCart(ttk.Toplevel):
             f'''INSERT INTO cart(product_id, service_id, user_id, amount) VALUES({id_product[0]}, {id_service[0]}, {int(id[0])}, '{amount_product}')'''
         )
         self.db.conn.commit()
+        self.destroy()
+        SuccessProductToCart()
 
 
 class ServicesCatalog(ttk.Toplevel):
@@ -946,7 +947,7 @@ class ServicesCatalog(ttk.Toplevel):
         self.tree.pack()
     def view_services_table(self):
         self.db.cur.execute(
-            '''SELECT * FROM services'''
+            '''SELECT * FROM services WHERE id != 4'''
         )
         [self.tree.delete(i) for i in self.tree.get_children()]
         [self.tree.insert('', 'end', values=row) for row in self.db.cur.fetchall()]
@@ -954,7 +955,7 @@ class ServicesCatalog(ttk.Toplevel):
     def view_services_filter(self, *args):
         value = self.combobox_filter.get()
         self.db.cur.execute(
-            f'''SELECT * FROM services WHERE category = "{value}"'''
+            f'''SELECT * FROM services WHERE category = "{value}" AND id != 4'''
         )
         [self.tree.delete(i) for i in self.tree.get_children()]
         [self.tree.insert('', 'end', values=row) for row in self.db.cur.fetchall()]

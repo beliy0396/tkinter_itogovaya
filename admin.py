@@ -221,7 +221,7 @@ class CategoryFinance(ttk.Toplevel):
         category_money = self.db.cur.fetchall()
         for i in category_money:
             self.full_money += int(i[0]) * int(i[1])
-        self.label_category_services_money.config(text=f'Прибыль по категории {self.combobox_categorys_products.get()} {self.full_money} руб.')
+        self.label_category_services_money.config(text=f'Прибыль по категории {self.combobox_categorys_services.get()} {self.full_money} руб.')
         self.full_money = 0
 
 class MonthFinance(ttk.Toplevel):
@@ -339,6 +339,7 @@ class SelectItem(ttk.Toplevel):
 
     def no(self):
         self.destroy()
+        Orders()
 
     def open_order_update(self):
         OrderUpdate()
